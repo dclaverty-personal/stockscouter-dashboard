@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Questrade RRSP — Super-Stack C Action Page</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--fg:#14181f;--mut:#667085;--line:#e4e7ec;--pos:#117a3d;--posbg:#ecfdf3;--neg:#c0262d;--negbg:#fef3f2;--warn:#b54708;--warnbg:#fffaeb;--c1:#2457c5;--c2:#8a94a6;--pill:#eef2ff;--pillfg:#1d4ed8}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#161b22;--fg:#e6e9ee;--mut:#8b95a5;--line:#262d38;--pos:#3fb870;--posbg:#0f291c;--neg:#f0636a;--negbg:#2d1417;--warn:#f5b74f;--warnbg:#2b210e;--c1:#6c9bff;--c2:#8b95a5;--pill:#1c2538;--pillfg:#8ab4ff}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:960px;margin:0 auto;padding:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+h1{font-size:20px;margin:0}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:22px 0 8px}
+.sub{color:var(--mut);font-size:12px;margin:2px 0 12px}
+.btn{display:inline-flex;align-items:center;gap:6px;font:12px/1.2 inherit;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--c1);color:var(--c1)}
+.btn.primary{background:var(--c1);color:#fff;border-color:var(--c1)}
+.btn.primary:hover{opacity:.92;color:#fff}
+.btn.sm{padding:4px 8px;font-size:11px;border-radius:6px}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--pill);color:var(--pillfg)}
+.badge.ok{background:var(--posbg);color:var(--pos)}
+.badge.sell{background:var(--negbg);color:var(--neg)}
+.badge.buy{background:var(--posbg);color:var(--pos)}
+.badge.warn{background:var(--warnbg);color:var(--warn)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:12px}
+.banner{border-radius:10px;padding:16px;margin-bottom:14px;border:1px solid var(--line);background:var(--card)}
+.banner.ok{border-left:4px solid var(--pos);background:var(--posbg)}
+.banner.act{border-left:4px solid var(--c1)}
+.banner.warn{border-left:4px solid var(--warn);background:var(--warnbg)}
+.banner h3{margin:0 0 6px;font-size:16px}
+.banner p{margin:4px 0;font-size:13px}
+.banner ol{margin:8px 0 0;padding-left:20px;font-size:13px}.banner li{margin:4px 0}
+.lockbox{max-width:440px;margin:36px auto;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.lockbox h2{margin:0 0 6px;font-size:16px;text-transform:none;letter-spacing:0;color:var(--fg)}
+.lockbox p{margin:0 0 14px;color:var(--mut);font-size:13px}
+.lockbox input[type=password]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:15px inherit;margin-bottom:10px}
+.lockbox label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);margin-bottom:14px;cursor:pointer}
+.err{color:var(--neg);font-size:12px;margin-top:8px;min-height:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;margin-bottom:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 13px}
+.tile span{display:block;font-size:11px;color:var(--mut)}
+.tile b{display:block;font-size:19px;margin-top:2px}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;white-space:nowrap}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);font-size:13px}
+th:first-child,td:first-child,.l{text-align:left}
+th{color:var(--mut);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:0}
+tr.done{opacity:.48;text-decoration:line-through}
+.ibs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.ibs-card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+.bar{height:5px;border-radius:3px;background:var(--line);margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c1);border-radius:3px}
+code{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}
+footer{margin:24px 0 8px;color:var(--mut);font-size:12px}
+</style></head><body><main>
+<div class="top">
+  <div>
+    <h1>🔒 Questrade RRSP — Super-Stack C Action</h1>
+    <div class="sub" id="meta">Encrypted client-side view · Loading…</div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <a class="btn" href="./index.html">← Paper Dashboard</a>
+    <a class="btn" href="https://github.com/dclaverty-personal/stockscouter/actions/workflows/questrade-action-page.yml" target="_blank" rel="noopener">↻ Run / Set Budget</a>
+    <button class="btn" id="lockBtn" style="display:none" onclick="lockDevice()">Lock</button>
+  </div>
+</div>
+
+<div id="root"></div>
+
+<footer>
+  <b>Paper research &amp; personal tracking tool — not financial advice.</b> Encrypted end-to-end with <code>PBKDF2-SHA256</code> (600k) + <code>AES-256-GCM</code> in GitHub Actions; decrypted locally in your browser via Web Crypto API. Strictly read-only — never places trades automatically.
+</footer>
+</main>
+
+<script>
+const LS_PASS = "qt_action_pass_v1";
+const LS_DONE = "qt_action_done_v1";
+let ENVELOPE = null;
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function usd(n){const v=Number(n||0);return "$"+v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function sgnUsd(n){const v=Number(n||0);return (v>=0?"+":"-")+usd(Math.abs(v))}
+function b64ToBytes(b){const s=atob(b);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
+
+async function decryptEnvelope(env, passphrase){
+  const enc = new TextEncoder();
+  const keyMat = await crypto.subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name:"PBKDF2", salt:b64ToBytes(env.salt), iterations:Number(env.iter||600000), hash:"SHA-256"},
+    keyMat,
+    {name:"AES-GCM", length:256},
+    false,
+    ["decrypt"]
+  );
+  const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64ToBytes(env.iv)}, key, b64ToBytes(env.ct));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function getDoneMap(){try{return JSON.parse(localStorage.getItem(LS_DONE)||"{}")}catch{return {}}}
+function toggleDone(key, trId){
+  const m = getDoneMap();
+  m[key] = !m[key];
+  localStorage.setItem(LS_DONE, JSON.stringify(m));
+  const row = document.getElementById(trId);
+  if(row) row.classList.toggle("done", !!m[key]);
+}
+function copyTxt(txt, btn){
+  navigator.clipboard?.writeText(txt);
+  const orig = btn.textContent;
+  btn.textContent = "Copied!";
+  setTimeout(()=>{btn.textContent = orig}, 1100);
+}
+function lockDevice(){
+  localStorage.removeItem(LS_PASS);
+  document.getElementById("lockBtn").style.display = "none";
+  renderLock();
+}
+
+function renderNotConfigured(env){
+  document.getElementById("meta").textContent = "Setup needed · Last check: " + (env.updated_pt || "pending");
+  document.getElementById("root").innerHTML = `
+    <div class="banner warn">
+      <h3>🔐 One-Time Setup: Add Your Dashboard Passphrase</h3>
+      <p>Your encrypted Questrade action page is live and ready — it just needs a passphrase secret so your balances are encrypted before leaving GitHub Actions.</p>
+      <ol>
+        <li>Open <b>GitHub → stockscouter → Settings → Secrets and variables → Actions</b>.</li>
+        <li>Click <b>New repository secret</b>, name it <code>QUESTRADE_DASHBOARD_PASS</code>, and enter any passphrase you want to use on this page.</li>
+        <li>During market hours (<code>6:30 AM – 1:00 PM PT</code> / <code>9:30 AM – 4:00 PM ET</code>), click <b>↻ Run / Set Budget</b> above and run <code>questrade-action-page</code> (or wait for the automatic <code>12:57 PM PT</code> update).</li>
+      </ol>
+      <p class="mut" style="margin-top:10px">Tip: Keep this passphrase different from <code>QUESTRADE_STATE_KEY</code> for full key separation.</p>
+    </div>`;
+}
+
+function renderLock(errMsg=""){
+  document.getElementById("meta").textContent = "Locked · Updated: " + (ENVELOPE?.updated_pt || "—");
+  document.getElementById("root").innerHTML = `
+    <div class="lockbox">
+      <h2>Enter Dashboard Passphrase</h2>
+      <p>Decrypts your private Questrade RRSP action checklist locally in this browser. Nothing is sent to any server.</p>
+      <form id="unlockForm">
+        <input id="passIn" type="password" autocomplete="current-password" placeholder="QUESTRADE_DASHBOARD_PASS" required autofocus>
+        <label><input id="remIn" type="checkbox" checked> Remember passphrase on this device</label>
+        <button class="btn primary" style="width:100%;justify-content:center;padding:10px" type="submit" id="subBtn">Unlock Action Page</button>
+        <div class="err" id="errBox">${esc(errMsg)}</div>
+      </form>
+    </div>`;
+  document.getElementById("unlockForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const pass = document.getElementById("passIn").value.trim();
+    const rem = document.getElementById("remIn").checked;
+    const btn = document.getElementById("subBtn");
+    const err = document.getElementById("errBox");
+    if(!pass) return;
+    btn.disabled = true; btn.textContent = "Decrypting…"; err.textContent = "";
+    try{
+      const data = await decryptEnvelope(ENVELOPE, pass);
+      if(rem) localStorage.setItem(LS_PASS, pass);
+      renderData(data);
+    }catch{
+      err.textContent = "Wrong passphrase (AES-GCM authentication failed).";
+      btn.disabled = false; btn.textContent = "Unlock Action Page";
+    }
+  };
+}
+
+function renderData(data){
+  document.getElementById("lockBtn").style.display = "inline-flex";
+  if(data.status === "scope_error"){
+    document.getElementById("meta").textContent = "Updated: " + (data.updated_pt || "—") + " · Read-Only Scope Needed";
+    document.getElementById("root").innerHTML = `
+      <div class="banner warn">
+        <h3>⚠️ Questrade Read-Only Account Permission Needed</h3>
+        <p>Your token rotated cleanly, but Questrade returned: <code>${esc(data.error)}</code>.</p>
+        <ol>
+          <li>Log in to <b>Questrade → App Hub → Personal Apps</b>.</li>
+          <li>Edit permissions and check <b>"Retrieve balances, positions, orders and executions"</b> (leave order placement OFF — still 100% read-only).</li>
+          <li>Click <b>Generate new token</b>, update repo secret <code>QUESTRADE_REFRESH_TOKEN</code>, delete the <code>questrade-state</code> branch, and re-run <code>questrade-action-page</code>.</li>
+        </ol>
+      </div>`;
+    return;
+  }
+
+  const p = data.plan;
+  const orders = p.orders || [];
+  const dlrCad = Number(p.dlr_cad_shares || 0);
+  const dlrUsd = Number(p.dlr_usd_shares || 0);
+  const dlrPx = Number(data.dlr_cad_px || 14.30);
+  const doneMap = getDoneMap();
+
+  document.getElementById("meta").textContent =
+    `Updated: ${data.updated_pt} · Account: ${data.acct_label} · Signals: ${p.as_of_state}`;
+
+  let bannerHtml = "";
+  if(dlrUsd > 0){
+    bannerHtml = `
+      <div class="banner act">
+        <h3>🎉 Norbert's Gambit Ready: Sell <code>DLR.U.TO</code> for USD Cash</h3>
+        <p>Your journal finished! You hold <b>${dlrUsd} shares of <code>DLR.U.TO</code></b>.</p>
+        <ol>
+          <li>Place a <b>SELL Limit order</b> for <b>${dlrUsd} shares of <code>DLR.U.TO</code></b> (USD) during regular market hours (<code>6:30 AM – 1:00 PM PT</code>).</li>
+          <li>Once filled, hit <b>↻ Run / Set Budget</b> above (or wait for <code>12:57 PM PT</code>) to get your 6 Super-Stack C buy tickets!</li>
+        </ol>
+      </div>`;
+  } else if(dlrCad > 0 && p.pool_usd < 200){
+    bannerHtml = `
+      <div class="banner warn">
+        <h3>⏳ Norbert's Gambit In Progress: Journal <code>DLR.TO</code> → <code>DLR.U.TO</code></h3>
+        <p>You currently hold <b>${dlrCad} shares of <code>DLR.TO</code></b>.</p>
+        <ol>
+          <li>If not submitted yet: go to <b>Questrade → Account Management → Journal Shares</b> → request <code>DLR.TO</code> → <code>DLR.U.TO</code> (<code>$9.95 + tax</code>).</li>
+          <li>Once it flips to <code>DLR.U.TO</code> (~3–5 business days), this page will automatically alert you to sell for USD!</li>
+        </ol>
+      </div>`;
+  } else if(p.pool_usd < 200 && p.cad_cash >= 500){
+    const dlrSh = Math.max(1, Math.floor((p.cad_cash - 15) / Math.max(dlrPx, 1)));
+    bannerHtml = `
+      <div class="banner act">
+        <h3>💱 STEP 0: Convert CAD → USD First (Norbert's Gambit)</h3>
+        <p>Your RRSP has <b>${usd(p.usd_cash)} USD</b> cash and <b>${usd(p.cad_cash)} CAD</b> cash.</p>
+        <ol>
+          <li>Confirm Questrade RRSP <b>Currency Settlement = Currency of transaction</b>.</li>
+          <li>Buy <b>${dlrSh} shares of <code>DLR.TO</code></b> (Limit ~<code>$${dlrPx.toFixed(2)} CAD</code>, <code>$0</code> commission; leaves ~$15 CAD for the journal fee).</li>
+          <li>Go to <b>Account Management → Journal Shares</b> → journal <code>DLR.TO</code> → <code>DLR.U.TO</code> (<code>$9.95 + tax</code>).</li>
+          <li>In ~3–5 business days, sell <code>DLR.U.TO</code> for USD — this page will automatically switch to your 6 ETF buy tickets!</li>
+        </ol>
+      </div>`;
+  } else if(orders.length === 0){
+    bannerHtml = `
+      <div class="banner ok">
+        <h3>✅ NO TRADES NEEDED TODAY</h3>
+        <p>All Super-Stack C sleeves are within target tolerance on your <b>${usd(p.pool_usd)} USD</b> pool. Close this tab and enjoy your day!</p>
+      </div>`;
+  } else {
+    const rowsHtml = orders.map((o, idx) => {
+      const k = `${data.updated_pt}|${o.side}|${o.ticker}|${o.shares}`;
+      const isDone = !!doneMap[k];
+      const trId = `ord_${idx}`;
+      const badge = o.side === "SELL" ? `<span class="badge sell">🔴 SELL</span>` : `<span class="badge buy">🟢 BUY</span>`;
+      return `<tr id="${trId}" class="${isDone?"done":""}">
+        <td><input type="checkbox" ${isDone?"checked":""} onchange="toggleDone('${esc(k)}','${trId}')"></td>
+        <td>${idx+1}</td>
+        <td class="l">${badge}</td>
+        <td class="l"><b><code>${esc(o.ticker)}</code></b> <button class="btn sm" onclick="copyTxt('${esc(o.ticker)}',this)">Copy</button></td>
+        <td><b>${o.shares}</b></td>
+        <td>${usd(o.price)}</td>
+        <td><b>${usd(o.est_usd)}</b></td>
+        <td class="l mut">${esc(o.reason)}</td>
+      </tr>`;
+    }).join("");
+    bannerHtml = `
+      <div class="banner act">
+        <h3>⚡ ACTION REQUIRED TODAY — ${orders.length} Manual Order${orders.length===1?"":"s"}</h3>
+        <p>Place <b>SELL</b> orders first (if any) to free USD cash, then <b>BUY</b> orders before <b>1:00 PM PT (4:00 PM ET)</b> (<code>$0</code> commission on Questrade).</p>
+      </div>
+      <div class="wrap" style="margin-bottom:14px">
+        <table>
+          <thead><tr><th>Done</th><th>#</th><th class="l">Side</th><th class="l">Ticker</th><th>Shares</th><th>Est. Px</th><th>Est. USD</th><th class="l">Why</th></tr></thead>
+          <tbody>${rowsHtml}</tbody>
+        </table>
+      </div>`;
+  }
+
+  const budgetNote = p.budget_usd > 0 ? `Capped at ${usd(p.budget_usd)} budget` : "Auto (ETFs + USD cash)";
+  const guardHtml = p.unrelated_count > 0
+    ? `<div class="sub">🛡️ <b>Safety guard:</b> Ignored <b>${p.unrelated_count}</b> unrelated RRSP holding${p.unrelated_count===1?"":"s"} (never touched).</div>`
+    : "";
+
+  const allocRows = (p.rows || []).map(r => {
+    const st = r.status === "TRADE" ? `<span class="badge warn">⚡ TRADE</span>`
+             : r.status === "HOLD"  ? `<span class="badge ok">✅ HOLD</span>`
+             : `<span class="mut">— FLAT</span>`;
+    const curPct = (r.cur_pct*100).toFixed(1), tgtPct = (r.tgt_pct*100).toFixed(1);
+    const barW = Math.min(100, Math.round(r.tgt_pct > 0 ? (r.cur_pct / r.tgt_pct) * 100 : 0));
+    const dCls = r.diff_usd > 0 ? "pos" : (r.diff_usd < 0 ? "neg" : "mut");
+    return `<tr>
+      <td class="l"><b><code>${esc(r.ticker)}</code></b></td>
+      <td>${r.cur_shares}</td>
+      <td>${usd(r.cur_usd)}</td>
+      <td>${curPct}%<div class="bar"><i style="width:${barW}%"></i></div></td>
+      <td><b>${tgtPct}%</b></td>
+      <td>${usd(r.tgt_usd)}</td>
+      <td class="${dCls}">${sgnUsd(r.diff_usd)}</td>
+      <td>${st}</td>
+    </tr>`;
+  }).join("");
+
+  const legs = [["SPY","SPYM"],["QQQ","QQQM"],["IWM","IWM"]].map(([lk, ek]) => {
+    const leg = (p.ibs_legs || {})[lk] || {};
+    const inPos = !!leg.in_pos;
+    const ibs = Number(leg.last_ibs ?? 0.5);
+    const badge = inPos ? `<span class="badge buy">🟢 INVESTED</span>` : `<span class="badge">⚪ SGOV CASH</span>`;
+    return `<div class="ibs-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <b><code>${lk}</code> → <code>${ek}</code></b>${badge}
+      </div>
+      <div class="mut" style="font-size:12px">IBS: <b>${ibs.toFixed(3)}</b> · Signal: <b>${esc(leg.last_signal || "—")}</b></div>
+      <div class="bar"><i style="width:${Math.max(2,Math.min(100,Math.round(ibs*100)))}%;background:${ibs<0.20?"var(--pos)":(ibs>0.80?"var(--neg)":"var(--c2)")}"></i></div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("root").innerHTML = `
+    ${bannerHtml}
+    <div class="tiles">
+      <div class="tile"><span>Super-Stack C Pool</span><b>${usd(p.pool_usd)}</b><span style="margin-top:2px">${esc(budgetNote)}</span></div>
+      <div class="tile"><span>Managed ETFs</span><b>${usd(p.managed_val)}</b><span>Super-Stack C only</span></div>
+      <div class="tile"><span>USD Cash</span><b>${usd(p.usd_cash)}</b><span>Available USD</span></div>
+      <div class="tile"><span>CAD Cash</span><b>${usd(p.cad_cash)}</b><span>For Norbert's Gambit</span></div>
+    </div>
+    ${guardHtml}
+    <h2>Current vs Target Allocation (SPYM ETF Flex)</h2>
+    <div class="wrap">
+      <table>
+        <thead><tr><th class="l">ETF</th><th>Qty</th><th>Current USD</th><th>Cur %</th><th>Tgt %</th><th>Target USD</th><th>Diff USD</th><th>Status</th></tr></thead>
+        <tbody>${allocRows}</tbody>
+      </table>
+    </div>
+    <h2>Live IBS-Classic Dip-Buyer Signals (12:55 PM PT / 3:55 PM ET)</h2>
+    <div class="ibs-grid">${legs}</div>`;
+}
+
+async function boot(){
+  try{
+    const resp = await fetch("./data/questrade.enc.json?t=" + Date.now(), {cache:"no-store"});
+    if(!resp.ok) throw new Error("HTTP " + resp.status);
+    ENVELOPE = await resp.json();
+    if(!ENVELOPE.configured){
+      renderNotConfigured(ENVELOPE);
+      return;
+    }
+    const saved = localStorage.getItem(LS_PASS) || localStorage.getItem("ss_dash_pass_v1");
+    if(saved){
+      try{
+        const data = await decryptEnvelope(ENVELOPE, saved);
+        renderData(data);
+        return;
+      }catch{
+        localStorage.removeItem(LS_PASS);
+      }
+    }
+    renderLock();
+  }catch(e){
+    document.getElementById("meta").textContent = "Failed to load encrypted bundle";
+    document.getElementById("root").innerHTML = `<div class="banner warn"><h3>Could not load <code>data/questrade.enc.json</code></h3><p>${esc(e.message)}</p></div>`;
+  }
+}
+boot();
+</script>
+</body></html>

@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StockScouter Paper Portfolio</title>
+<style>
+:root{--bg:#f7f8fa;--card:#fff;--fg:#14181f;--mut:#667085;--line:#e4e7ec;--pos:#117a3d;--neg:#c0262d;--c1:#2457c5;--c2:#8a94a6;--c3:#d9822b;--c4:#7c3aed;--pill:#eef2ff;--pillfg:#1d4ed8}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--card:#161b22;--fg:#e6e9ee;--mut:#8b95a5;--line:#262d38;--pos:#3fb870;--neg:#f0636a;--c1:#6c9bff;--c2:#8b95a5;--c3:#e8a050;--c4:#a78bfa;--pill:#1c2538;--pillfg:#8ab4ff}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:1040px;margin:0 auto;padding:16px}
+h1{font-size:21px;margin:0 0 4px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:28px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h3{font-size:12px;font-weight:600;color:var(--mut);margin:14px 0 6px}
+#hdr{color:var(--mut);margin:0 0 10px}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.nav a{text-decoration:none;font-size:12px;font-weight:500;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--fg)}
+.nav a:hover{border-color:var(--c1);color:var(--c1)}
+.badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.03em;padding:2px 7px;border-radius:999px;background:var(--pill);color:var(--pillfg);text-transform:none}
+.desc{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c1);border-radius:8px;padding:10px 14px;margin:0 0 10px;font-size:13px;line-height:1.5}
+.desc p{margin:0 0 6px}.desc p:last-child{margin:0}
+.desc ul{margin:4px 0 6px;padding-left:18px}.desc li{margin:2px 0}
+.desc code{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 4px}
+.idea{color:var(--c1);font-weight:700}
+.daily-note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c3);border-radius:8px;padding:9px 13px;margin:0 0 10px;font-size:12.5px;line-height:1.45}
+.daily-note p{margin:0 0 4px}.daily-note p:last-child{margin:0}
+.daily-note code{font:12px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 4px}
+.bt{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px solid var(--line);font-size:12px;color:var(--mut)}
+.bt b{color:var(--fg)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+.tile,.card{background:var(--card);border:1px solid var(--line);border-radius:8px}
+.tile{padding:10px 12px}.tile b{display:block;font-size:19px;font-weight:600}.tile span{color:var(--mut);font-size:11px;display:block}
+.card{padding:8px}
+.wrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:8px}
+.scroll{max-height:360px;overflow-y:auto}
+table{border-collapse:collapse;width:100%;white-space:nowrap}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child,.l{text-align:left}th{color:var(--mut);font-weight:500;font-size:12px}
+td a{color:var(--c1);text-decoration:none;font-weight:600}td a:hover{text-decoration:underline}
+tr:last-child td{border-bottom:0}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.mut{color:var(--mut)}.empty{padding:14px;color:var(--mut);text-align:center}
+#chart,#ibkrchart,#sschart,#stackchart,#rrspchart,#fvtchart,#qcfchart,#qcfv2chart{position:relative}svg{display:block;width:100%;height:auto}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);padding:2px 6px 6px}
+.leg i{display:inline-block;width:10px;height:3px;margin-right:5px;vertical-align:middle}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:12px;display:none;box-shadow:0 2px 10px #0003;white-space:nowrap;z-index:5}
+.act{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--line);border-radius:8px}
+.act li{padding:8px 12px;border-bottom:1px solid var(--line)}.act li:last-child{border:0}.act small{color:var(--mut)}
+.toplink{margin-left:auto;font-size:11px;font-weight:500;text-transform:none;letter-spacing:0;text-decoration:none;color:var(--mut)}
+.toplink:hover{color:var(--c1)}
+.ai-box{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c4);border-radius:8px;padding:11px 14px;margin:0 0 10px;font-size:13px;line-height:1.5}
+.ai-box p{margin:0 0 6px}.ai-box p:last-child{margin:0}
+.ai-inline{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--c4);border-radius:8px;padding:9px 13px;margin:0 0 10px;font-size:12.5px;line-height:1.45}
+.ai-inline .ai-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.ai-inline .ai-exp{color:var(--mut);font-size:11.5px;margin-top:4px}
+.ai-st{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:999px;text-transform:uppercase}
+.ai-on{background:#e6f6ec;color:#117a3d}.ai-watch{background:#fef3c7;color:#92400e}.ai-act{background:#fee2e2;color:#b91c1c}
+@media(prefers-color-scheme:dark){.ai-on{background:#123322;color:#4ade80}.ai-watch{background:#3a2a0b;color:#fbbf24}.ai-act{background:#3b1419;color:#f87171}}
+.ai-actions{background:var(--card);border:1px solid var(--neg);border-left:3px solid var(--neg);border-radius:8px;padding:9px 14px;margin:0 0 10px;font-size:12.5px}
+.ai-actions ul{margin:4px 0 0;padding-left:18px}.ai-actions li{margin:2px 0}
+.wrap-text{white-space:normal;min-width:220px;max-width:440px}
+footer{margin:28px 0 8px;color:var(--mut);font-size:12px}
+.lockbox{max-width:440px;margin:36px auto;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.lockbox h2{margin:0 0 6px;font-size:16px;text-transform:none;letter-spacing:0;color:var(--fg)}
+.lockbox p{margin:0 0 14px;color:var(--mut);font-size:13px}
+.lockbox input[type=password]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:15px inherit;margin-bottom:10px}
+.lockbox label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mut);margin-bottom:14px;cursor:pointer}
+.lockbox .err{color:var(--neg);font-size:12px;margin-top:8px;min-height:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:12px/1.2 inherit;font-weight:600;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.btn:hover{border-color:var(--c1);color:var(--c1)}
+.btn.primary{background:var(--c1);color:#fff;border-color:var(--c1);width:100%;padding:10px}
+.titlebar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+</style></head><body><main id="top">
+<div class="titlebar">
+  <h1>🔒 StockScouter Paper Portfolio</h1>
+  <button class="btn" id="lockBtn" style="display:none" onclick="lockDevice()">Lock</button>
+</div>
+<div id="lock"></div>
+<div id="content" style="display:none">
+
+</div>
+
+<footer><div id="upd"></div><p>All accounts are paper accounts. Backtest figures are historical research benchmarks net of modeled friction and are not guarantees of future performance. Nothing here is investment advice.</p><p>Encrypted with <code>PBKDF2-SHA256</code> (600k) + <code>AES-256-GCM</code> in GitHub Actions; decrypted locally in your browser via the Web Crypto API.</p></footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=(x,d=0)=>x==null||isNaN(x)?'–':Number(x).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(x,d=1)=>x==null||isNaN(x)?'–':(x>=0?'+':'')+(x*100).toFixed(d)+'%';
+const money=x=>x==null||isNaN(x)?'–':(x<0?'-':'')+'$'+num(Math.abs(x));
+const sgn=x=>x>0?'pos':x<0?'neg':'';
+const pnlc=x=>`<span class="${sgn(x)}">${x==null?'–':(x>0?'+':x<0?'-':'')+'$'+num(Math.abs(x))}</span>`;
+async function j(n){return (BUNDLE&&BUNDLE.files&&BUNDLE.files[n])||{}}
+// ---- Encrypted bundle (PBKDF2-SHA256 + AES-256-GCM, same format as questrade.html) ----
+const LS_PASS='ss_dash_pass_v1',LS_PASS_QT='qt_action_pass_v1';
+let BUNDLE=null,PASS=null,KEYC={salt:null,key:null},LAST_IV=null;
+const b64=b=>{const s=atob(b);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+async function deriveKey(pass,env){
+  if(KEYC.key&&KEYC.salt===env.salt&&KEYC.pass===pass)return KEYC.key;
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(env.salt),iterations:Number(env.iter||600000),hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+  KEYC={salt:env.salt,key,pass};return key;
+}
+async function decryptEnv(env,pass){
+  const key=await deriveKey(pass,env);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(env.iv)},key,b64(env.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function fetchEnv(){
+  const r=await fetch('data/dashboard.enc.json?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+// Re-fetch the envelope; decrypt only if it changed. Returns true when BUNDLE is usable.
+async function refreshBundle(){
+  try{
+    const env=await fetchEnv();
+    if(!env.configured||!PASS)return !!BUNDLE;
+    if(env.iv===LAST_IV&&BUNDLE)return true;
+    const data=await decryptEnv(env,PASS);
+    injectHtml(data)
+    BUNDLE=data;LAST_IV=env.iv;return true;
+  }catch(e){return !!BUNDLE}
+}
+// Static markup is injected once per unlock (re-injecting on each refresh would reset scroll/layout).
+function injectHtml(data){const c=$('content');if(data.html&&!c.dataset.inj){c.innerHTML=data.html;c.dataset.inj='1'}}
+function lockDevice(){
+  localStorage.removeItem(LS_PASS);PASS=null;BUNDLE=null;LAST_IV=null;KEYC={salt:null,key:null};
+  $('content').style.display='none';$('lockBtn').style.display='none';
+  if($('content').dataset.inj){$('content').innerHTML='';delete $('content').dataset.inj}
+  renderLock();
+}
+function renderLock(msg='',env=null){
+  $('lock').style.display='';
+  if(env&&!env.configured){
+    $('lock').innerHTML=`<div class="lockbox"><h2>Setup needed</h2><p>The encrypted dashboard bundle has not been published yet. Add the <code>DASHBOARD_PASS</code> (or <code>QUESTRADE_DASHBOARD_PASS</code>) repository secret and re-run <code>dashboard-publish</code>.</p></div>`;
+    return;
+  }
+  $('lock').innerHTML=`<div class="lockbox"><h2>Enter Dashboard Passphrase</h2>
+    <p>Decrypts the StockScouter dashboard locally in this browser. Nothing is sent to any server.</p>
+    <form id="unlockForm"><input id="passIn" type="password" autocomplete="current-password" placeholder="Passphrase" required autofocus>
+    <label><input id="remIn" type="checkbox" checked> Remember passphrase on this device</label>
+    <button class="btn primary" type="submit" id="subBtn">Unlock Dashboard</button>
+    <div class="err" id="errBox">${esc(msg)}</div></form></div>`;
+  $('unlockForm').onsubmit=async e=>{
+    e.preventDefault();
+    const p=$('passIn').value.trim();if(!p)return;
+    const rem=$('remIn').checked;
+    const btn=$('subBtn');btn.disabled=true;btn.textContent='Decrypting…';$('errBox').textContent='';
+    if(rem)localStorage.setItem(LS_PASS,p);
+    if(!(await tryUnlock(p))){
+      if(rem)localStorage.removeItem(LS_PASS);
+      $('errBox').textContent='Wrong passphrase (AES-GCM authentication failed).';btn.disabled=false;btn.textContent='Unlock Dashboard';
+    }
+  };
+}
+async function tryUnlock(p){
+  try{
+    const env=await fetchEnv();
+    if(!env.configured){renderLock('',env);return false}
+    const data=await decryptEnv(env,p);
+    PASS=p;BUNDLE=data;LAST_IV=env.iv;
+    injectHtml(data)
+    $('lock').style.display='none';$('lock').innerHTML='';
+    $('content').style.display='';$('lockBtn').style.display='inline-flex';
+    await load();
+    if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView()}
+    return true;
+  }catch(e){KEYC={salt:null,key:null};return false}
+}
+async function boot(){
+  let env;
+  try{env=await fetchEnv()}catch(e){$('lock').innerHTML=`<div class="lockbox"><h2>Could not load encrypted bundle</h2><p>${esc(e.message)}</p></div>`;return}
+  if(!env.configured){renderLock('',env);return}
+  for(const k of [LS_PASS,LS_PASS_QT]){
+    const saved=localStorage.getItem(k);
+    if(saved&&await tryUnlock(saved)){if(k!==LS_PASS)localStorage.setItem(LS_PASS,saved);return}
+    if(saved&&k===LS_PASS)localStorage.removeItem(LS_PASS);
+  }
+  renderLock();
+}
+function table(el,cols,rows,empty){
+  if(!rows.length){el.innerHTML='<div class="empty">'+esc(empty)+'</div>';return}
+  el.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c[0]}</th>`).join('')+'</tr></thead><tbody>'+
+   rows.map(r=>'<tr>'+cols.map(c=>`<td>${c[1](r)}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
+}
+function lineChart(el,eq,series,ariaLabel){
+  if(!eq.length){el.innerHTML='<div class="empty">No data yet</div>';return}
+  const W=Math.max(300,el.clientWidth-4),H=Math.round(Math.min(300,W*.62)),L=56,R=12,T=10,B=24;
+  const all=eq.flatMap(e=>series.map(s=>e[s[0]])).filter(v=>v!=null);
+  let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*.08||Math.max(1000,lo*.01);lo-=pad;hi+=pad;
+  const x=i=>L+(eq.length>1?i/(eq.length-1):.5)*(W-L-R),y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  let g='';
+  for(let k=0;k<=4;k++){const v=lo+(hi-lo)*k/4;g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mut)">${num(v/1000,1)}k</text>`}
+  const step=Math.max(1,Math.ceil(eq.length/6));
+  eq.forEach((e,i)=>{if(i%step===0)g+=`<text x="${x(i)}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--mut)">${esc(e.date.slice(5))}</text>`});
+  series.forEach(([k,c])=>{const pts=eq.map((e,i)=>e[k]==null?null:x(i)+','+y(e[k])).filter(Boolean);
+    if(pts.length===1){const [cx,cy]=pts[0].split(',');g+=`<circle cx="${cx}" cy="${cy}" r="4" fill="var(${c})"/>`}
+    else g+=`<polyline fill="none" stroke="var(${c})" stroke-width="${k==='value'?2.5:1.75}" points="${pts.join(' ')}"/>`});
+  g+='<line class="cur" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--mut)" style="display:none"/>';
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(ariaLabel)}">${g}</svg><div class="tip"></div>`;
+  const svg=el.querySelector('svg'),tip=el.querySelector('.tip'),cur=el.querySelector('.cur');
+  const v0=eq[0]?.value,b0=series[1]?eq[0]?.[series[1][0]]:null;
+  function show(ev){const r=svg.getBoundingClientRect(),p=(ev.touches?ev.touches[0]:ev);
+    const px=(p.clientX-r.left)/r.width*W;let i=eq.length>1?Math.round((px-L)/(W-L-R)*(eq.length-1)):0;i=Math.max(0,Math.min(eq.length-1,i));
+    const e=eq[i];cur.setAttribute('x1',x(i));cur.setAttribute('x2',x(i));cur.style.display='';
+    let html=`<b>${esc(e.date)}</b>`;
+    series.forEach(([k,_,lbl])=>{
+      const val=e[k],base=eq[0]?.[k];
+      const retStr=(val!=null&&base>0)?` (${pct(val/base-1,2)})`:'';
+      html+=`<br>${esc(lbl)}: <b>${money(val)}</b>${retStr}`;
+    });
+    if(series.length>=2&&e.value!=null&&e[series[1][0]]!=null&&v0>0&&b0>0){
+      const sp=(e.value/v0-1)-(e[series[1][0]]/b0-1);
+      const diff=e.value-e[series[1][0]];
+      html+=`<br>Spread vs ${esc(series[1][2])}: <b class="${sgn(sp)}">${pct(sp,2)}</b> (${diff>=0?'+':''}${money(diff)})`;
+    }
+    tip.innerHTML=html;
+    tip.style.display='block';const tw=tip.offsetWidth;let left=x(i)/W*r.width+10;if(left+tw>r.width)left-=tw+20;tip.style.left=Math.max(0,left)+'px';tip.style.top='10px'}
+  svg.addEventListener('mousemove',show);svg.addEventListener('touchstart',show,{passive:true});svg.addEventListener('touchmove',show,{passive:true});
+  svg.addEventListener('mouseleave',()=>{tip.style.display='none';cur.style.display='none'});
+}
+function renderMonthly(prefix,label,data){
+  const s=(data.summary||[])[0]||{};
+  if(!s.date)return;
+  $(prefix+'sec').style.display='';
+  $(prefix+'sub').textContent=`· since ${s.start} (as of ${s.date})`;
+  $(prefix+'tiles').innerHTML=[
+    ['Value (USD)',money(s.value),''],
+    ['Return',pct(s.return,2),sgn(s.return)],
+    ['SPY (Same Window)',pct(s.spy_return,2),sgn(s.spy_return)],
+    ['vs SPY (Alpha)',pct(s.excess_return,2),sgn(s.excess_return)],
+    ['Drawdown',pct(s.drawdown,2),sgn(s.drawdown)],
+    ['Last Day',pct(s.day_change,2),sgn(s.day_change)],
+    ['Positions',num(s.positions),''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  lineChart($(prefix+'chart'),data.equity||[],[['value','--c1',label],['spy_value','--c2','SPY (USD)']],label+' daily value vs SPY in USD');
+  table($(prefix+'hold'),[['Ticker',r=>esc(r.ticker)],['Cap',r=>esc(r.cap_tier)],['Qty',r=>num(r.shares,1)],['Entry',r=>num(r.entry,2)],['Last',r=>num(r.last,2)],['Value',r=>money(r.value)],['P&L %',r=>`<span class="${sgn(r.pnl_pct)}">${pct(r.pnl_pct)}</span>`]],data.positions||[],'No open positions');
+  const a=(data.activity||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  $(prefix+'act').innerHTML=a.length?a.map(x=>`<li><small>${esc(x.date)}</small> <b>${esc(x.event)}</b><br>${esc(x.detail)}</li>`).join(''):'<li class="empty">No activity</li>';
+}
+function renderStack(data){
+  const s=(data.summary||[])[0]||{};
+  if(!s.date)return;
+  $('stacksec').style.display='';
+  $('stacksub').textContent=`· since ${s.start} (as of ${s.date})`;
+  const split=`${Math.round((s.w_qcf||0)*100)}% / ${Math.round((s.w_cta||0)*100)}%`;
+  $('stacktiles').innerHTML=[
+    ['Value (USD)',money(s.value),''],
+    ['Return',pct(s.return,2),sgn(s.return)],
+    ['SPY (Same Window)',pct(s.spy_return,2),sgn(s.spy_return)],
+    ['vs SPY (Alpha)',pct(s.excess_return,2),sgn(s.excess_return)],
+    ['Drawdown',pct(s.drawdown,2),sgn(s.drawdown)],
+    ['Last Day',pct(s.day_change,2),sgn(s.day_change)],
+    ['QCF / CTA Split',split,''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  lineChart($('stackchart'),data.equity||[],[['value','--c1','Adaptive Stack 150'],['spy_value','--c2','SPY (USD)']],'Adaptive Stack 150 daily value vs SPY in USD');
+  table($('stackcta'),[['Ticker',r=>esc(r.ticker)],['Asset Class',r=>esc(r.asset_class)],['Side',r=>`<span class="${r.side==='Long'?'pos':'neg'}">${esc(r.side)}</span>`],['Port Wt',r=>pct(r.weight_pct,1)],['Qty',r=>num(r.shares,1)],['Entry',r=>num(r.entry,2)],['Last',r=>num(r.last,2)],['Notional',r=>money(r.notional)],['P&L',r=>pnlc(r.pnl)]],data.cta_positions||[],'No CTA positions');
+  const lg=(data.learning_log||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  table($('stacklog'),[['Date',r=>esc(r.date)],['QCF Wt',r=>num((r.w_qcf||0)*100,1)+'%'],['CTA Wt',r=>num((r.w_cta||0)*100,1)+'%'],['Gross',r=>num(r.gross,2)+'x'],['Update Note',r=>`<span class="l">${esc(r.note)}</span>`]],lg,'No weight updates yet');
+  const a=(data.activity||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  $('stackact').innerHTML=a.length?a.map(x=>`<li><small>${esc(x.date)}</small> <b>${esc(x.event)}</b><br>${esc(x.detail)}</li>`).join(''):'<li class="empty">No activity</li>';
+}
+function renderRRSP(data){
+  const s=(data.summary||[])[0]||{};
+  if(!s.date)return;
+  $('rrspsec').style.display='';
+  $('rrspsub').textContent=`· since ${s.start} (as of ${s.date})`;
+  const split=`${Math.round((s.eff_equity||0)*100)}% Eq / ${Math.round((s.eff_cta||0)*100)}% CTA`;
+  $('rrsptiles').innerHTML=[
+    ['Value (USD)',money(s.value),''],
+    ['Return',pct(s.return,2),sgn(s.return)],
+    ['SPY (Same Window)',pct(s.spy_return,2),sgn(s.spy_return)],
+    ['vs SPY (Alpha)',pct(s.excess_return,2),sgn(s.excess_return)],
+    ['Drawdown',pct(s.drawdown,2),sgn(s.drawdown)],
+    ['Last Day',pct(s.day_change,2),sgn(s.day_change)],
+    ['Look-Through',split,''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  lineChart($('rrspchart'),data.equity||[],[['value','--c1','RRSP-Native 150'],['spy_value','--c2','SPY (USD)']],'RRSP-Native Adaptive 150 daily value vs SPY in USD');
+  table($('rrspsleeves'),[['Sleeve',r=>esc(r.sleeve)],['Role',r=>`<span class="l">${esc(r.role)}</span>`],['Cash Wt',r=>num((r.cash_wt||0)*100,1)+'%'],['Qty',r=>num(r.shares,1)],['Value',r=>money(r.value)],['P&L %',r=>`<span class="${sgn(r.pnl_pct)}">${pct(r.pnl_pct)}</span>`]],data.sleeves||[],'No sleeves');
+  const lg=(data.learning_log||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  table($('rrsplog'),[['Date',r=>esc(r.date)],['RSST',r=>num((r.w_rsst||0)*100,0)+'%'],['QCF-50',r=>num((r.w_qcf||0)*100,1)+'%'],['DBMF',r=>num((r.w_dbmf||0)*100,1)+'%'],['Look-Through',r=>`${num((r.eff_equity||0)*100,0)}% Eq / ${num((r.eff_cta||0)*100,0)}% CTA`],['Note',r=>`<span class="l">${esc(r.note)}</span>`]],lg,'No weight updates yet');
+  const a=(data.activity||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  $('rrspact').innerHTML=a.length?a.map(x=>`<li><small>${esc(x.date)}</small> <b>${esc(x.event)}</b><br>${esc(x.detail)}</li>`).join(''):'<li class="empty">No activity</li>';
+}
+function renderSuperStack(data){
+  const s=(data.summary||[])[0]||{};
+  if(!s.date)return;
+  $('sssec').style.display='';
+  $('sssub').textContent=`· since ${s.start} (as of ${s.date})`;
+  const split=`${Math.round((s.eff_equity||0)*100)}% Eq / ${Math.round((s.eff_cta||0)*100)}% CTA / ${Math.round((s.eff_gold||0)*100)}% Au`;
+  $('sstiles').innerHTML=[
+    ['Value (USD)',money(s.value),''],
+    ['Return',pct(s.return,2),sgn(s.return)],
+    ['SPY (Same Window)',pct(s.spy_return,2),sgn(s.spy_return)],
+    ['vs SPY (Alpha)',pct(s.excess_return,2),sgn(s.excess_return)],
+    ['Drawdown',pct(s.drawdown,2),sgn(s.drawdown)],
+    ['Last Day',pct(s.day_change,2),sgn(s.day_change)],
+    ['Look-Through',split,''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  lineChart($('sschart'),data.equity||[],[['value','--c1','RRSP Super-Stack C'],['spy_value','--c2','SPY (USD)']],'RRSP Super-Stack C daily value vs SPY in USD');
+  table($('sssleeves'),[['Sleeve',r=>esc(r.sleeve)],['Role',r=>`<span class="l">${esc(r.role)}</span>`],['Cash Wt',r=>num((r.cash_wt||0)*100,1)+'%'],['Qty',r=>num(r.shares,1)],['Value',r=>money(r.value)],['P&L %',r=>`<span class="${sgn(r.pnl_pct)}">${pct(r.pnl_pct)}</span>`]],data.sleeves||[],'No sleeves');
+  table($('ssibs'),[['Leg',r=>esc(r.ticker)],['Status',r=>`<span class="${r.status==='INVESTED'?'pos':'mut'}">${esc(r.status)}</span>`],['Holding',r=>esc(r.holding)],['Last IBS',r=>num(r.last_ibs,3)],['Signal',r=>`<span class="l">${esc(r.last_signal)}</span>`],['Value',r=>money(r.value)],['P&L %',r=>`<span class="${sgn(r.pnl_pct)}">${pct(r.pnl_pct)}</span>`]],data.ibs_legs||[],'No IBS legs');
+  const lg=(data.learning_log||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  table($('sslog'),[['Date',r=>esc(r.date)],['QCF-v2',r=>num((r.w_qcf_v2||0)*100,1)+'%'],['DBMF',r=>num((r.w_dbmf||0)*100,1)+'%'],['GLD',r=>num((r.w_gld||0)*100,1)+'%'],['IBS',r=>`${num(r.ibs_active,0)}/3`],['Note',r=>`<span class="l">${esc(r.note)}</span>`]],lg,'No weight updates yet');
+  const a=(data.activity||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  $('ssact').innerHTML=a.length?a.map(x=>`<li><small>${esc(x.date)}</small> <b>${esc(x.event)}</b><br>${esc(x.detail)}</li>`).join(''):'<li class="empty">No activity</li>';
+}
+function renderIBKRPaper(data){
+  const sl=data.sleeves||[];
+  if(!sl.length)return;
+  $('ibkrsec').style.display='';
+  $('ibkrsub').textContent=`· since ${data.start} (as of ${data.date})`;
+  const avgSlip=Number(data.avg_slippage_bp||0);
+  const gateOk=Math.abs(avgSlip)<=5.0;
+  $('ibkrtiles').innerHTML=[
+    ['IBKR Sleeves',String(sl.length)+' × $100k',''],
+    ['Real Fills Logged',String(data.total_fills||0),''],
+    ['Avg Price Slippage',`${avgSlip>=0?'+':''}${avgSlip.toFixed(2)} bp`,avgSlip<=5?'pos':'neg'],
+    ['Total Commissions',money(data.total_commissions_usd||0),''],
+    ['#113 Slippage Gate',gateOk?'✅ ≤ 5 bp':'⚠️ > 5 bp',gateOk?'pos':'neg'],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  table($('ibkrdiv'),[
+    ['IBKR Sleeve',r=>`<b>${esc(r.label)}</b>`],
+    ['IBKR Real $',r=>`<b>${money(r.value)}</b>`],
+    ['IBKR Ret',r=>`<b class="${sgn(r.return)}">${pct(r.return,2)}</b>`],
+    ['Model Ref',r=>`<span class="mut">${esc(r.model_name||'—')}</span>`],
+    ['Model Ret',r=>r.model_return==null?'–':`<span class="${sgn(r.model_return)}">${pct(r.model_return,2)}</span>`],
+    ['Divergence',r=>r.divergence_bp==null?'–':`<b class="${Math.abs(r.divergence_bp)<=50?'pos':'neg'}">${r.divergence_bp>=0?'+':''}${num(r.divergence_bp,1)} bp</b>`],
+    ['Avg Slip',r=>`${r.avg_slippage_bp>=0?'+':''}${num(r.avg_slippage_bp,2)} bp`],
+    ['Commissions',r=>money(r.commissions_usd)],
+    ['Pos / Trd',r=>`${r.positions} / ${r.trades}`],
+  ],sl,'No IBKR paper sleeves yet');
+  lineChart($('ibkrchart'),data.equity||[],[
+    ['superstack_fixed','--c1','IBKR: Super-Stack Fixed'],
+    ['qcf_v2','--pos','IBKR: QCF-50 v2'],
+    ['superstack_qcf','--c3','IBKR: Super-Stack QCF'],
+    ['ai_catalyst','--neg','IBKR: AI Catalyst 100k'],
+    ['dislocation_swing','--c4','IBKR: Dislocation Swing 100k'],
+    ['hollow_moat_short','#a855f7','IBKR: Hollow-Moat Short 100k'],
+    ['spy_value','--c2','SPY (USD)'],
+  ],'IBKR real-fill paper sleeves vs SPY in USD');
+  table($('ibkrfills'),[
+    ['Time (ET)',r=>`<small class="mut">${esc((r.signal_time_et||'').slice(0,16))}</small>`],
+    ['Sleeve',r=>esc(r.sleeve)],
+    ['Side',r=>`<b class="${r.side==='BUY'?'pos':'neg'}">${esc(r.side)}</b>`],
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Qty',r=>num(r.qty,0)],
+    ['Type',r=>esc(r.order_type)],
+    ['Signal Px',r=>money(r.signal_px)],
+    ['Fill Px',r=>money(r.fill_px)],
+    ['Comm',r=>money(r.commission_usd)],
+    ['Slip bp',r=>`<span class="${(r.slippage_bp||0)<=5?'pos':'neg'}">${(r.slippage_bp||0)>=0?'+':''}${num(r.slippage_bp,2)}</span>`],
+    ['Total bp',r=>`${(r.total_cost_bp||0)>=0?'+':''}${num(r.total_cost_bp,2)}`],
+  ],data.fills||[],'No IBKR fills logged yet');
+}
+function renderScorecard(e2,ibkr,ss,stack,rrsp,qcfv2,qcf,fvt){
+  const rows=[];
+  const add=(name,href,style,s,spyKey,exVal,bt)=>{
+    if(!s||!s.date)return;
+    const spyR=s[spyKey];
+    const ex=(exVal!=null)?exVal:(s.return!=null&&spyR!=null?s.return-spyR:null);
+    rows.push({name,href,style,cur:s.currency||'USD',val:s.value,ret:s.return,spy:spyR,ex,dd:s.drawdown,day:s.day_change,since:s.start,bt});
+  };
+  for(const sl of (ibkr.sleeves||[])){
+    const bt=sl.key==='qcf_v2'?'Real IBKR Fills (vs QCF-v2)':(sl.key==='ai_catalyst'?'Intraday Brackets (0.5% risk)':(sl.key==='dislocation_swing'?'Swing GTC Brackets (0.5% risk, 3-15d)':(sl.key==='hollow_moat_short'?'Hedged Short + QQQ (+10.3% OOS)':'Real IBKR Fills (vs SS-C)')));
+    const href=sl.key==='ai_catalyst'?'#aicatsec':(sl.key==='dislocation_swing'?'#dislocsec':(sl.key==='hollow_moat_short'?'#moatsec':'#ibkrsec'));
+    add(sl.label,href,`IBKR Real-Fill Paper · ${sl.style}`,sl,'spy_return',sl.excess_return,bt);
+  }
+  add('RRSP Super-Stack C (Model)','#sssec','100% Cash RRSP (4-Engine + IBS)',(ss.summary||[])[0],'spy_return',(ss.summary||[])[0]?.excess_return,'+12.6% bias-corr / -25% DD');
+  add('QCF-50 v2 (Model)','#qcfv2sec','Long-Only Top-1,000 Free Data',(qcfv2.summary||[])[0],'spy_return',(qcfv2.summary||[])[0]?.excess_return,'+13.5% / Sh 0.94');
+  add('RRSP-Native Adaptive 150','#rrspsec','100% Cash RRSP (1.5× look-through)',(rrsp.summary||[])[0],'spy_return',(rrsp.summary||[])[0]?.excess_return,'+12.8% / -28% DD');
+  add('Adaptive Stack 150','#stacksec','Dual-Engine 1.5× (Margin/Futures)',(stack.summary||[])[0],'spy_return',(stack.summary||[])[0]?.excess_return,'+14.8% / -26% DD');
+  add('QCF-50','#qcfsec','Long-Only Top-1,000 US (RRSP OK)',(qcf.summary||[])[0],'spy_return',(qcf.summary||[])[0]?.excess_return,'+12.4% / -46% DD');
+  add('FVT-50','#fvtsec','Long-Only All-Cap EW',(fvt.summary||[])[0],'spy_return',(fvt.summary||[])[0]?.excess_return,'+10.1% / -41% DD');
+  const es=(e2.summary||[])[0];
+  add('E2 (CAD)','#e2sec','Microcaps + Hedged SPY (CAD)',es,'spy_hedged_return',es&&es.return!=null&&es.spy_hedged_return!=null?es.return-es.spy_hedged_return:null,'2014–19 FAIL (#59)');
+  table($('cmp'),[
+    ['Strategy',r=>`<a href="${r.href}">${esc(r.name)}</a>`],
+    ['Style / Account',r=>`<span class="l mut">${esc(r.style)}</span>`],
+    ['Value',r=>`${money(r.val)} <small class="mut">${esc(r.cur)}</small>`],
+    ['Return',r=>`<b class="${sgn(r.ret)}">${pct(r.ret,2)}</b>`],
+    ['SPY (Same Window)',r=>`<span class="${sgn(r.spy)}">${pct(r.spy,2)}</span>`],
+    ['vs SPY (Alpha)',r=>`<b class="${sgn(r.ex)}">${pct(r.ex,2)}</b>`],
+    ['Drawdown',r=>`<span class="${sgn(r.dd)}">${pct(r.dd,2)}</span>`],
+    ['Last Day',r=>`<span class="${sgn(r.day)}">${pct(r.day,2)}</span>`],
+    ['Notes / 25.8yr Backtest',r=>`<span class="mut">${esc(r.bt)}</span>`],
+  ],rows,'No active strategies yet');
+}
+function labRows(l){
+  let L=l.ledgers;if(!L)return[];
+  const arr=Array.isArray(L)?L:Object.entries(L).map(([k,v])=>Object.assign({track:k},v));
+  const open=Array.isArray(l.open)?l.open:[];
+  return arr.map(r=>{const t=r.track||r.name||r.id;return Object.assign({},r,{_t:t,_open:r.open_count??(Array.isArray(l.open)?open.filter(o=>(o.track||o.ledger)===t).length:Object.keys((l.open||{})[t]||{}).length)})});
+}
+function renderAICatalyst(data){
+  const sec=$('aicatsec');
+  if(!data||!data.date){sec.style.display='none';return}
+  sec.style.display='';
+  const sl=data.sleeve||{};
+  const app=data.approved||[],dos=data.dossiers||[];
+  const stance=String(data.macro_stance||'neutral').toUpperCase();
+  const scls=stance==='CONSTRUCTIVE'?'pos':(stance==='DEFENSIVE'?'neg':'');
+  $('aicatsub').textContent=`· ${data.date}`;
+  const wm=(data.worker_models||[]).join(', ')||'gemini';
+  $('aicatdesc').innerHTML=`<p><b>Macro Stance:</b> <b class="${scls}">${esc(stance)}</b> · <b>Controller:</b> <code>${esc(data.controller_model||'—')}</code> · <b>Workers:</b> <code>${esc(wm)}</code></p><p>${esc(data.macro_note||'No macro note.')}</p>`;
+  $('aicattiles').innerHTML=[
+    ['Live Equity',money(sl.equity??sl.initial??100000),sl.return_pct!=null?sgn(sl.return_pct):''],
+    ['Open P&L',sl.open_pnl_usd!=null?`${sl.open_pnl_usd>=0?'+':''}${money(sl.open_pnl_usd)}`:'—',sl.open_pnl_usd!=null?sgn(sl.open_pnl_usd):''],
+    ['Cash USD',money(sl.cash??100000),''],
+    ['Approved Today',`${app.length} / 3`,app.length?'pos':''],
+    ['Triaged / Skipped',`${dos.length} / ${dos.filter(d=>d.decision!=='APPROVED').length}`,''],
+    ['Total Fills',num(sl.trades||0,0),''],
+    ['Commissions',money(sl.commissions_usd||0),''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  table($('aicatapproved'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Setup',r=>`<code>${esc(r.setup)}</code>`],
+    ['Type',r=>esc(r.entry_type)],
+    ['Qty',r=>num(r.qty,0)],
+    ['Entry / Fill',r=>money(r.avg_fill_px!=null?r.avg_fill_px:r.entry_px)],
+    ['Last',r=>r.last_px!=null?`<b>${money(r.last_px)}</b>`:'–'],
+    ['Open P&L',r=>r.open_pnl_usd!=null
+      ? `<b class="${sgn(r.open_pnl_usd)}">${r.open_pnl_usd>=0?'+':''}${money(r.open_pnl_usd)}</b> <small class="${sgn(r.open_pnl_pct)}">(${r.open_pnl_pct>=0?'+':''}${num(r.open_pnl_pct,2)}%${r.open_pnl_r!=null?` · ${r.open_pnl_r>=0?'+':''}${num(r.open_pnl_r,2)}R`:''})</small>`
+      : (r.vs_entry_pct!=null?`<small class="mut">${r.vs_entry_pct>=0?'+':''}${num(r.vs_entry_pct,2)}% vs entry</small>`:'–')],
+    ['Stop',r=>`<span class="neg">${money(r.stop_loss)}</span>`],
+    ['Target',r=>`<span class="pos">${money(r.take_profit)}</span>`],
+    ['Risk / R',r=>`${money(r.risk_usd)} · <b>${num(r.rr,2)}R</b>`],
+    ['Status',r=>`<code>${esc(r.status||'PLANNED')}</code>`],
+    ['AI Thesis',r=>`<span class="l mut">${esc(r.rationale)}</span>`],
+  ],app,'NO TRADE TODAY — 0 setups cleared AI + risk-gate filters.');
+  const tds=data.tape_decisions||[];
+  $('aicattapewrap').style.display=tds.length?'':'none';
+  if(tds.length){
+    table($('aicattape'),[
+      ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+      ['Gate Verdict',r=>`<b class="${r.verdict==='TAPE_CONFIRMED'?'pos':(r.verdict==='TAPE_REJECTED'||r.verdict==='INVALIDATED'?'neg':'')}">${esc(r.verdict)}</b>`],
+      ['Watch',r=>r.elapsed_sec!=null?`${num(r.elapsed_sec,0)}s`:'–'],
+      ['Prints',r=>num(r.total_prints||0,0)],
+      ['Buy Agg',r=>r.buy_aggression!=null?`${num(r.buy_aggression*100,0)}%`:'–'],
+      ['L2 OBI',r=>r.l2_available&&r.l2_obi!=null?`${r.l2_obi>=0?'+':''}${num(r.l2_obi,2)}`:'<span class="mut">n/a</span>'],
+      ['Order-Flow Note',r=>`<span class="l mut">${esc(r.reason||'')}</span>`],
+    ],tds,'');
+  }
+  const dcs=data.deep_checks||[];
+  $('aicatdeepwrap').style.display=dcs.length?'':'none';
+  if(dcs.length){
+    table($('aicatdeep'),[
+      ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+      ['Filing',r=>`<code>${esc(r.document||'8-K')}</code>`],
+      ['Guidance',r=>`<b>${esc(r.guidance_direction||'—')}</b>`],
+      ['Verdict',r=>`<b class="${r.verdict==='CONFIRMED_BULLISH'?'pos':(r.verdict==='HIDDEN_BEARISH_TRAP'?'neg':'')}">${esc(r.verdict||'—')}</b>`],
+      ['Hidden Flags',r=>(r.hidden_red_flags&&r.hidden_red_flags.length)?`<span class="neg">${esc(r.hidden_red_flags.join(', '))}</span>`:'<span class="mut">none</span>'],
+      ['Forensic Note',r=>`<span class="l mut">${esc(r.note||'')}</span>`],
+    ],dcs,'');
+  }
+  const ab=data.ab||{};
+  const abc=ab.cumulative||{};
+  const abRows=[
+    ['STAGE0_ALL','Stage-0 All (No AI Baseline)'],
+    ['AI_SKIPPED','AI Skipped (Dodged by Gemini)'],
+    ['AI_APPROVED','AI Approved (Blind Entry)'],
+    ['TAPE_CONFIRMED','AI + Tape Confirmed'],
+    ['TAPE_REJECTED','AI + Tape Rejected'],
+  ].map(([k,lbl])=>Object.assign({key:k,label:lbl},abc[k]||{})).filter(r=>(r.n||0)>0);
+  $('aicatabwrap').style.display=abRows.length?'':'none';
+  if(abRows.length){
+    table($('aicatab'),[
+      ['Bucket',r=>`<b>${esc(r.label)}</b>`],
+      ['Days',()=>num(ab.total_days||0,0)],
+      ['Signals',r=>num(r.n||0,0)],
+      ['Win Rate',r=>r.win_rate==null?'–':`${num(r.win_rate*100,1)}%`],
+      ['Avg 10:25→EOD',r=>r.avg_eod_ret_pct==null?'–':`<b class="${sgn(r.avg_eod_ret_pct)}">${r.avg_eod_ret_pct>=0?'+':''}${num(r.avg_eod_ret_pct,2)}%</b>`],
+      ['Avg Bracket',r=>r.avg_bracket_ret_pct==null?'–':`<span class="${sgn(r.avg_bracket_ret_pct)}">${r.avg_bracket_ret_pct>=0?'+':''}${num(r.avg_bracket_ret_pct,2)}%</span>`],
+      ['Avg R',r=>r.avg_r==null?'–':`<b class="${sgn(r.avg_r)}">${r.avg_r>=0?'+':''}${num(r.avg_r,2)}R</b>`],
+    ],abRows,'');
+  }
+  table($('aicatdossiers'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Decision',r=>`<b class="${r.decision==='APPROVED'?'pos':'mut'}">${esc(r.decision)}</b>`],
+    ['Catalyst',r=>`<code>${esc(r.catalyst_type||'—')}</code>`],
+    ['Freshness',r=>esc(r.catalyst_freshness||'—')],
+    ['Str',r=>r.strength?`${r.strength}/5`:'–'],
+    ['Sector',r=>`<span class="${r.sector_alignment==='tailwind'?'pos':(r.sector_alignment==='headwind'?'neg':'mut')}">${esc(r.sector_alignment||'—')}</span>`],
+    ['Red Flags',r=>(r.red_flags&&r.red_flags.length)?`<span class="neg">${esc(r.red_flags.join(', '))}</span>`:'<span class="mut">none</span>'],
+    ['Reason / Tape',r=>`<span class="l mut">${esc(r.reason||'')}</span>`],
+  ],dos,'No worker dossiers yet');
+}
+function renderDislocation(data){
+  const sec=$('dislocsec');
+  if(!data||(!data.date&&!(data.watchlist||[]).length)){sec.style.display='none';return}
+  sec.style.display='';
+  const sl=data.sleeve||{};
+  const wl=data.watchlist||[],br=data.brackets||[],promos=data.promotions||[],verds=data.verdicts||[];
+  $('dislocsub').textContent=data.date?`· ${data.date}`:'';
+  const promoHtml=promos.length
+    ? `<p><b class="pos">Buy Alerts Today (${promos.length}):</b> ${promos.map(p=>`<b>${esc(p.ticker)}</b> (${esc(p.from_bucket)} → ACTIONABLE_WATCH @ ${money(p.px)})`).join(' · ')}</p>`
+    : `<p><b>Daily Monitor:</b> Tracks clean non-fundamental selloffs &amp; buy-blocked active overhangs (up to 60 trading days) until overhangs clear and tape confirms. Pings <b>GitHub Issue #${esc(data.alert_issue||136)}</b> only on <code>ACTIONABLE_WATCH</code> promotions.</p>`;
+  $('dislocdesc').innerHTML=promoHtml;
+  $('disloctiles').innerHTML=[
+    ['Live Equity',money(sl.equity??sl.initial??100000),sl.return_pct!=null?sgn(sl.return_pct):''],
+    ['Open P&L',sl.open_pnl_usd!=null?`${sl.open_pnl_usd>=0?'+':''}${money(sl.open_pnl_usd)}`:'—',sl.open_pnl_usd!=null?sgn(sl.open_pnl_usd):''],
+    ['Cash USD',money(sl.cash??100000),''],
+    ['Open Positions',`${sl.positions||0} / 5`,(sl.positions||0)?'pos':''],
+    ['Tracked Watchlist',num(wl.length,0),''],
+    ['Buy Alerts Today',num(promos.length,0),promos.length?'pos':''],
+    ['Total Fills',num(sl.trades||0,0),''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  table($('dislocbrackets'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Date',r=>`<small class="mut">${esc(r.trade_date)}</small>`],
+    ['Qty',r=>num(r.qty,0)],
+    ['Entry / Fill',r=>money(r.avg_fill_px!=null?r.avg_fill_px:r.entry_px)],
+    ['Last',r=>r.last_px!=null?`<b>${money(r.last_px)}</b>`:'–'],
+    ['Open P&L / vs LMT',r=>r.open_pnl_usd!=null
+      ? `<b class="${sgn(r.open_pnl_usd)}">${r.open_pnl_usd>=0?'+':''}${money(r.open_pnl_usd)}</b> <small class="${sgn(r.open_pnl_pct)}">(${r.open_pnl_pct>=0?'+':''}${num(r.open_pnl_pct,2)}%${r.open_pnl_r!=null?` · ${r.open_pnl_r>=0?'+':''}${num(r.open_pnl_r,2)}R`:''})</small>`
+      : (r.vs_entry_pct!=null?`<small class="mut">${r.vs_entry_pct>=0?'+':''}${num(r.vs_entry_pct,2)}% vs LMT</small>`:'–')],
+    ['Stop',r=>`<span class="neg">${money(r.stop_loss)}</span>`],
+    ['Target',r=>`<span class="pos">${money(r.take_profit)}</span>`],
+    ['Risk / R',r=>`${money(r.risk_usd)} · <b>${num(r.rr,2)}R</b>`],
+    ['Status',r=>`<code>${esc(r.status||'SUBMITTED')}</code>`],
+    ['Policy / Thesis',r=>`<span class="l mut">${esc(r.rationale)}</span>`],
+  ],br,'No open IBKR Dislocation Swing GTC brackets yet.');
+  const bCls=b=>b==='ACTIONABLE_WATCH'?'pos':(b==='WATCHLIST_OPEN_OVERHANG'?'neg':'');
+  table($('dislocwl'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>${r.held_shares?` <span class="badge">${r.held_shares} sh</span>`:''}`],
+    ['Bucket',r=>`<b class="${bCls(r.bucket)}">${esc(r.bucket)}</b>`],
+    ['First Seen',r=>`<small class="mut">${esc(r.first_seen_date)}</small>`],
+    ['Current',r=>money(r.current_px)],
+    ['Since Seen',r=>`<span class="${sgn(r.ret_since_seen_pct)}">${r.ret_since_seen_pct>=0?'+':''}${num(r.ret_since_seen_pct,2)}%</span>`],
+    ['Days',r=>num(r.days_tracked,0)],
+    ['Tape State',r=>`<code>${esc(r.tape_state)}</code>`],
+    ['Shock / Overhang',r=>`<small>${esc(r.shock_type)} · ${esc(r.overhang_status)}</small>`],
+    ['Reclaim / Inv',r=>`${money(r.reclaim_trigger_px)} / <span class="neg">${money(r.invalidation_px)}</span>`],
+  ],wl,'No active dislocation watchlist names yet.');
+  table($('dislocverdicts'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Bucket',r=>`<b class="${bCls(r.bucket)}">${esc(r.bucket)}</b>`],
+    ['Day % / 20d DD',r=>`<span class="${sgn(r.day_chg_pct)}">${r.day_chg_pct>=0?'+':''}${num(r.day_chg_pct,1)}%</span> / <span class="neg">${num(r.drawdown_20d_pct,1)}%</span>`],
+    ['Noise',r=>r.noise_score?`${r.noise_score}/5`:'–'],
+    ['Forensic',r=>`<code>${esc(r.forensic_verdict||'NOT_RUN')}</code>`],
+    ['Audit / Policy Gate',r=>`<span class="l mut">${esc(r.reason)}</span>`],
+  ],verds,'No triage runs recorded yet.');
+}
+function renderHollowMoat(data){
+  const sec=$('moatsec');
+  if(!data||(!data.date&&!(data.watchlist||[]).length)){sec.style.display='none';return}
+  sec.style.display='';
+  const sl=data.sleeve||{};
+  const br=data.brackets||[];
+  const wl=data.watchlist||[];
+  const verds=data.verdicts||[];
+  const hp=data.hedge_positions||{};
+  const hedgeStr=Object.keys(hp).length?Object.entries(hp).map(([k,v])=>`${v} ${k}`).join(', '):'Flat (0 sh)';
+  $('moatsub').textContent=`· ${data.date||'—'} · ${(data.forensic_models||data.worker_models||['Deterministic']).join(', ')}`;
+  const promos=data.promotions||[];
+  $('moatdesc').innerHTML=promos.length
+    ? `<b class="neg">SHORT ALERT (Issue #${data.alert_issue||156}):</b> ${promos.map(p=>`<b>${esc(p.ticker)}</b> (${esc(p.from_bucket)}→ACTIONABLE_SHORT @ ${money(p.px)}, ${p.fragility_score||0}/10, stop ${money(p.short_stop_px)})`).join(' · ')}`
+    : `Mon/Thu 16:45 ET Hollow-Moat scan · Long beta hedge: <b>${esc(hedgeStr)}</b> · Alerts Issue #${data.alert_issue||156} only on clean <code>ACTIONABLE_SHORT</code> promotions.`;
+  $('moattiles').innerHTML=[
+    ['Sleeve Equity',money(sl.equity??sl.initial??100000),''],
+    ['Return',`${(sl.return_pct||0)>=0?'+':''}${num(sl.return_pct||0,2)}%`,sgn(sl.return_pct)],
+    ['Open Short P&L',sl.open_pnl_usd!=null?`${sl.open_pnl_usd>=0?'+':''}${money(sl.open_pnl_usd)}`:'–',sgn(sl.open_pnl_usd)],
+    ['Short / Hedge $',`${money(sl.gross_short_usd||0)} / ${money(sl.hedge_usd||0)}`,''],
+    ['Open Shorts',`${num(sl.short_positions||0,0)} / 6`,''],
+    ['Watchlist',num(wl.length,0),''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join('');
+  table($('moatbrackets'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Short Qty',r=>`<span class="neg">${num(r.qty,0)}</span>`],
+    ['Entry / Fill',r=>`${money(r.avg_fill_px??r.entry_px)}${r.avg_fill_px!=null?' <small class="mut">(fill)</small>':''}`],
+    ['Last',r=>r.last_px!=null?`<b>${money(r.last_px)}</b>`:'–'],
+    ['Open P&L (Short)',r=>r.open_pnl_usd!=null
+      ? `<b class="${sgn(r.open_pnl_usd)}">${r.open_pnl_usd>=0?'+':''}${money(r.open_pnl_usd)}</b> <small class="${sgn(r.open_pnl_pct)}">(${r.open_pnl_pct>=0?'+':''}${num(r.open_pnl_pct,2)}%${r.open_pnl_r!=null?` · ${r.open_pnl_r>=0?'+':''}${num(r.open_pnl_r,2)}R`:''})</small>`
+      : (r.vs_entry_pct!=null?`<small class="mut">${r.vs_entry_pct>=0?'+':''}${num(r.vs_entry_pct,2)}% short edge</small>`:'–')],
+    ['Upside Stop',r=>`<span class="neg">${money(r.stop_loss)}</span>`],
+    ['Target',r=>`<span class="pos">${money(r.take_profit)}</span>`],
+    ['Status',r=>`<code>${esc(r.status||'SUBMITTED')}</code>`],
+    ['Thesis',r=>`<span class="l mut">${esc(r.rationale)}</span>`],
+  ],br,'No open IBKR Hollow-Moat Short GTC brackets yet.');
+  const mbCls=b=>b==='ACTIONABLE_SHORT'?'neg':(b==='WATCH_MOAT_EROSION'?'':'mut');
+  table($('moatwl'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>${r.held_shares?` <span class="badge">${r.held_shares} sh</span>`:''}`],
+    ['Bucket',r=>`<b class="${mbCls(r.bucket)}">${esc(r.bucket)}</b>`],
+    ['Archetype',r=>`<small>${esc(r.moat_archetype)}</small>`],
+    ['Fragility / Quant',r=>`<b>${num(r.fragility_score,0)}/10</b> · ${num(r.quant_score,0)}`],
+    ['Current',r=>money(r.current_px)],
+    ['Short Ret',r=>`<span class="${sgn(r.short_ret_since_seen_pct)}">${r.short_ret_since_seen_pct>=0?'+':''}${num(r.short_ret_since_seen_pct,2)}%</span>`],
+    ['Tape State',r=>`<code>${esc(r.tape_state)}</code>`],
+    ['Upside Stop',r=>`<span class="neg">${money(r.short_stop_px)}</span>`],
+  ],wl,'No active hollow-moat watchlist names yet.');
+  table($('moatverdicts'),[
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b>`],
+    ['Bucket',r=>`<b class="${mbCls(r.bucket)}">${esc(r.bucket)}</b>`],
+    ['Fragility / Quant',r=>`${num(r.fragility_score,0)}/10 · ${num(r.quant_score,0)}`],
+    ['60d RS/IGV',r=>r.rs60_vs_igv_pp!=null?`<span class="${sgn(-r.rs60_vs_igv_pp)}">${r.rs60_vs_igv_pp>=0?'+':''}${num(r.rs60_vs_igv_pp,1)}pp</span>`:'–'],
+    ['EV/S · SI%',r=>`${r.ev_sales!=null?num(r.ev_sales,1)+'×':'–'} · ${r.short_pct_float!=null?num(r.short_pct_float,1)+'%':'–'}`],
+    ['Forensic',r=>`<code>${esc(r.forensic_verdict||'NOT_RUN')}</code>`],
+    ['Devil\'s Advocate / Policy Gate',r=>`<span class="l mut">${esc(r.reason)}</span>`],
+  ],verds,'No hollow-moat triage runs recorded yet.');
+}
+function renderEodAi(data){
+  const sec=$('eodaisec');
+  if(!data||!data.headline){sec.style.display='none';return}
+  sec.style.display='';
+  const stBadge=st=>{
+    const s=String(st||'ON_TRACK').toUpperCase();
+    const cls=s==='ACTION_NEEDED'?'ai-act':(s==='WATCH'?'ai-watch':'ai-on');
+    const lbl=s==='ACTION_NEEDED'?'Action Needed':(s==='WATCH'?'Watch':'On Track');
+    return `<span class="ai-st ${cls}">${lbl}</span>`;
+  };
+  $('eodaimodel').textContent=data.model||'Gemini';
+  $('eodaisub').textContent=data.date?`· ${data.date}`+(data.generated_pt?` (${data.generated_pt})`:''):'';
+  $('eodaihead').innerHTML=`<p><b>${esc(data.headline)}</b></p>${data.regime_note?`<p class="mut">${esc(data.regime_note)}</p>`:''}`;
+  const acts=data.action_items||[];
+  const actEl=$('eodaiactions');
+  if(acts.length){
+    actEl.style.display='';
+    actEl.innerHTML=`<b>Action / Watch Items (${acts.length})</b><ul>${acts.map(a=>`<li>${esc(a)}</li>`).join('')}</ul>`;
+  }else{
+    actEl.style.display='none';
+  }
+  const items=data.strategy_insights||[];
+  table($('eodaitable'),[
+    ['Strategy',r=>r.section_id?`<a href="#${esc(r.section_id)}">${esc(r.strategy||r.key)}</a>`:`<b>${esc(r.strategy||r.key)}</b>`],
+    ['Status',r=>stBadge(r.status)],
+    ['Expected Outcome',r=>`<div class="l mut wrap-text">${esc(r.expected_outcome||'—')}</div>`],
+    ['Actual vs. Expected (EOD AI Review)',r=>`<div class="l wrap-text">${esc(r.actual_vs_expected||'')}</div>`],
+  ],items,'No per-strategy AI commentary yet.');
+  // Inject a compact EOD AI Actual-vs-Expected banner directly after each strategy's Original Idea card
+  document.querySelectorAll('.ai-inline').forEach(el=>el.remove());
+  for(const it of items){
+    if(!it.section_id)continue;
+    const target=$(it.section_id);
+    if(!target)continue;
+    const anchor=target.querySelector('.desc')||target.querySelector('h2');
+    if(!anchor)continue;
+    const box=document.createElement('div');
+    box.className='ai-inline';
+    box.innerHTML=`<div class="ai-head"><b>EOD AI Review (${esc(data.date||'')})</b> ${stBadge(it.status)} <span class="mut" style="font-size:11px">${esc(data.model||'')}</span></div>`+
+      `<div>${esc(it.actual_vs_expected||'')}</div>`+
+      (it.expected_outcome?`<div class="ai-exp"><b>Expected:</b> ${esc(it.expected_outcome)}</div>`:'');
+    anchor.insertAdjacentElement('afterend',box);
+  }
+}
+function renderAITradeMemory(mem){
+  const wrap=$('aimemwrap');
+  const entries=(mem&&mem.entries)||[];
+  if(!entries.length){wrap.style.display='none';return}
+  wrap.style.display='';
+  const sec=$('eodaisec');
+  if(sec&&sec.style.display==='none')sec.style.display='';
+  table($('aimemtable'),[
+    ['Exit Date',r=>`<small class="mut">${esc(r.exit_date)}</small>`],
+    ['Strategy',r=>`<code>${esc(r.strategy)}</code>`],
+    ['Ticker',r=>`<b>${esc(r.ticker)}</b> <small class="mut">${esc(r.direction)}</small>`],
+    ['Setup',r=>`<small>${esc(r.setup)}</small>`],
+    ['P&L / R',r=>`<b class="${sgn(r.realized_pnl_usd)}">${r.realized_pnl_usd>=0?'+':''}${money(r.realized_pnl_usd)}</b> <small>(${r.realized_pnl_pct>=0?'+':''}${num(r.realized_pnl_pct,2)}%${r.realized_r!=null?` · ${r.realized_r>=0?'+':''}${num(r.realized_r,2)}R`:''})</small>`],
+    ['Process Tag',r=>`<code>${esc(r.verdict_tag)}</code>`],
+    ['What Went Right / Wrong',r=>`<div class="l wrap-text"><span class="pos">+</span> ${esc(r.what_went_right||'—')}<br><span class="neg">−</span> ${esc(r.what_went_wrong||'—')}</div>`],
+    ['Rule Fed Into Next Trade',r=>`<div class="l mut wrap-text">${esc(r.actionable_rule||'')}</div>`],
+  ],entries,'No closed AI trades journaled yet.');
+}
+async function load(){
+  const [e2,ibkr,aicat,disloc,moat,eodai,aimem,ss,stack,rrsp,qcfv2,qcf,fvt,lab,orb,meta]=await Promise.all([j('e2'),j('ibkr_paper'),j('ai_catalyst'),j('dislocation_triage'),j('hollow_moat'),j('eod_ai'),j('ai_trade_memory'),j('superstack'),j('stack'),j('rrsp'),j('qcf_v2'),j('qcf'),j('fvt'),j('lab'),j('orb'),j('meta')]);
+  const s=(e2.summary||[])[0]||{};
+  const sss=(ss.summary||[])[0]||{},rs=(rrsp.summary||[])[0]||{},st=(stack.summary||[])[0]||{};
+  const parts=[];
+  if(sss.date)parts.push(`Super-Stack C <b class="${sgn(sss.return)}">${pct(sss.return,2)}</b> (<span class="${sgn(sss.excess_return)}">${pct(sss.excess_return,2)}</span> vs SPY)`);
+  if(ibkr.total_fills)parts.push(`IBKR Paper <b>${ibkr.total_fills} fills</b> (avg slip ${ibkr.avg_slippage_bp>=0?'+':''}${num(ibkr.avg_slippage_bp,1)}bp)`);
+  if(rs.date)parts.push(`RRSP-Native 150 <b class="${sgn(rs.return)}">${pct(rs.return,2)}</b> (<span class="${sgn(rs.excess_return)}">${pct(rs.excess_return,2)}</span> vs SPY)`);
+  if(st.date)parts.push(`Adaptive Stack 150 <b class="${sgn(st.return)}">${pct(st.return,2)}</b> (<span class="${sgn(st.excess_return)}">${pct(st.excess_return,2)}</span> vs SPY)`);
+  $('hdr').innerHTML=parts.length?parts.join(' · ')+` · as of ${esc(sss.date||rs.date||st.date||s.date)}`:'No data';
+  renderEodAi(eodai);
+  renderAITradeMemory(aimem);
+  renderScorecard(e2,ibkr,ss,stack,rrsp,qcfv2,qcf,fvt);
+  renderIBKRPaper(ibkr);
+  renderAICatalyst(aicat);
+  renderDislocation(disloc);
+  renderHollowMoat(moat);
+  renderSuperStack(ss);
+  renderRRSP(rrsp);
+  renderStack(stack);
+  renderMonthly('qcfv2','QCF-50 v2',qcfv2);
+  renderMonthly('qcf','QCF-50',qcf);
+  renderMonthly('fvt','FVT-50',fvt);
+  $('tiles').innerHTML=s.date?[
+    ['Value (CAD)',money(s.value),''],
+    ['Return',pct(s.return,2),sgn(s.return)],
+    ['Hedged SPY',pct(s.spy_hedged_return,2),sgn(s.spy_hedged_return)],
+    ['vs Hedged SPY',pct(s.return!=null&&s.spy_hedged_return!=null?s.return-s.spy_hedged_return:null,2),sgn((s.return||0)-(s.spy_hedged_return||0))],
+    ['Drawdown',pct(s.drawdown,2),sgn(s.drawdown)],
+    ['Last Day',pct(s.day_change,2),sgn(s.day_change)],
+    ['Positions',num(s.positions),''],
+  ].map(t=>`<div class="tile"><span>${t[0]}</span><b class="${t[2]}">${t[1]}</b></div>`).join(''):'';
+  lineChart($('chart'),e2.equity||[],[['value','--c1','E2'],['spy_hedged','--c3','Hedged SPY'],['spy_cad','--c2','SPY CAD']],'E2 daily value vs hedged SPY and SPY in CAD');
+  table($('hold'),[['Ticker',r=>esc(r.ticker||r.symbol)],['Qty',r=>num(r.qty??r.shares)],['Entry',r=>num(r.entry??r.cost,2)],['Last',r=>num(r.last??r.price,2)],['P&L %',r=>{const v=r.pnl_pct??r.return;return `<span class="${sgn(v)}">${v==null?'–':pct(v)}</span>`}]],e2.positions||[],'No open positions. Cash is in hedged SPY.');
+  const rows=labRows(lab);
+  table($('lab'),[['Track',r=>esc(r._t)],['Trades',r=>num(r.n)],['Hit 3R %',r=>r.n?num(r.targets/r.n*100,0)+'%':'–'],['Net R/trade',r=>r.n?num(r.sum_r/r.n,2):'–'],['Total P&L',r=>pnlc(r.cum_pnl)],['Today P&L',r=>pnlc(r.today_pnl??r.day_pnl??r.today)],['Open',r=>num(r._open)],['Halted',r=>r.halted?'Yes':'No']],rows,'Lab starts trading 23 Nov');
+  $('orbd').textContent=orb.date?'· '+orb.date:'';
+  const tr=orb.trades||[];
+  $('orbasof').textContent=orb.as_of?`· as of ${orb.as_of} ET · open P&L `+(orb.open_pnl==null?'–':(orb.open_pnl>=0?'+':'')+Math.round(orb.open_pnl).toLocaleString()):'';
+  table($('orbopen'),[['Ticker',r=>esc(r.ticker)],['Side',r=>r.dir===-1?'Short':'Long'],['Qty',r=>num(r.qty)],['In',r=>num(r.entry,2)],['Last',r=>num(r.last,2)],['Stop',r=>num(r.stop,2)],['Target',r=>num(r.target,2)],['P&L',r=>pnlc(r.pnl)]],orb.open||[],'No open positions');
+  const lo=[];for(const [t,m] of Object.entries(lab.open||{}))for(const [c,p] of Object.entries(m||{}))lo.push({...p,_t:t,_c:c});
+  table($('labopen'),[['Track',r=>esc(r._t)],['Ticker',r=>esc(r.ticker||String(r._c).replace('US.',''))],['Side',r=>r.dir===-1?'Short':'Long'],['Qty',r=>num(r.qty)],['In',r=>num(r.entry,2)],['Stop',r=>num(r.stop,2)],['Target',r=>num(r.target,2)]],lo,'No open lab positions');
+  table($('orb'),[['Ticker',r=>esc(r.ticker)],['Side',r=>r.dir===-1?'Short':'Long'],['In',r=>num(r.entry,2)],['Out',r=>num(r.exit,2)],['Exit',r=>esc(r.why)],['R',r=>`<span class="${sgn(r.r)}">${num(r.r,2)}</span>`],['P&L',r=>pnlc(r.pnl)]],tr,'No trades yet');
+  const a=(e2.activity||[]).slice().sort((p,q)=>q.date.localeCompare(p.date));
+  $('act').innerHTML=a.length?a.map(x=>`<li><small>${esc(x.date)}</small> <b>${esc(x.event)}</b><br>${esc(x.detail)}</li>`).join(''):'<li class="empty">No activity</li>';
+  if(meta.updated){$('upd').textContent='Data updated '+new Date(meta.updated).toLocaleString('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'})+' ET'}
+  document.querySelectorAll('section[id] > h2').forEach(h=>{if(!h.querySelector('.toplink')){const a=document.createElement('a');a.className='toplink';a.href='#top';a.textContent='↑ Top';h.appendChild(a)}});
+  document.querySelectorAll('nav.nav a[href^="#"]').forEach(a=>{const t=$(a.getAttribute('href').slice(1));if(t)a.style.display=t.style.display==='none'?'none':''});
+}
+boot();
+let rw=innerWidth;addEventListener('resize',()=>{if(BUNDLE&&innerWidth!==rw){rw=innerWidth;load()}});
+async function refresh(){if(document.visibilityState==='visible'&&PASS&&await refreshBundle())load()}
+setInterval(refresh,120000);
+document.addEventListener('visibilitychange',refresh);
+</script></body></html>
